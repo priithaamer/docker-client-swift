@@ -14,6 +14,16 @@ extension DockerClient {
             return try await client.request(DockerAPI.Containers.List(all: all)).map(Container.fromListContainers)
         }
 
+        public func logs(container: Container,
+                         follow: Bool=true,
+                         timestamps: Bool=false,
+                         tail: Int?=nil) throws -> AsyncStream<String> {
+            return try self.client.stream(DockerAPI.Containers.Logs(containerId: container.id,
+                                                                    follow: follow,
+                                                                    timestamps: timestamps,
+                                                                    tail: tail))
+        }
+
         }
     }
 }
