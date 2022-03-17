@@ -24,6 +24,8 @@ extension DockerClient {
                                                                     tail: tail))
         }
 
+        public func stats(container: Container, stream: Bool=true) throws -> AsyncStream<ResourceUsage> {
+            return try self.client.stream(DockerAPI.Containers.Stats(containerId: container.id, stream: stream))
         }
     }
 }
