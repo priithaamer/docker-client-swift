@@ -11,13 +11,15 @@ extension DockerClient {
         internal var client: DockerClient
 
         public func list(all: Bool=false) async throws -> [Container] {
-            return try await client.request(ListContainers(all: all)).map(Container.fromListContainers)
+            return try await client.request(DockerAPI.Containers.List(all: all)).map(Container.fromListContainers)
+        }
+
         }
     }
 }
 
 extension Container {
-    static func fromListContainers(_ container: ListContainers.Container) -> Container {
+    static func fromListContainers(_ container: DockerAPI.Containers.List.Container) -> Container {
         return Container(id: container.Id,
                          names: container.Names,
                          image: container.Image,
@@ -35,17 +37,18 @@ extension Container {
 }
 
 extension ContainerPort {
-    static func fromListContainers(_ port: ListContainers.ContainerPort) -> ContainerPort {
-        return ContainerPort(ip: port.IP, privatePort: port.PrivatePort, publicPort: port.PublicPort)
+    static func fromListContainers(_ port: DockerAPI.Containers.List.ContainerPort) -> ContainerPort {
+        return ContainerPort(ip: port.IP, privatePort: port.PrivatePort, publicPort: port.PublicPort, kind: port.Kind)
     }
 }
 
 extension ContainerMount {
-    static func fromListContainers(_ mount: ListContainers.ContainerMount) -> ContainerMount {
+    static func fromListContainers(_ mount: DockerAPI.Containers.List.ContainerMount) -> ContainerMount {
         return ContainerMount(name: mount.Name,
                               source: mount.Source,
                               destination: mount.Destination,
                               driver: mount.Driver,
+                              kind: mount.Kind,
                               mode: mount.Mode,
                               rw: mount.RW,
                               propagation: mount.Propagation)

@@ -1,6 +1,3 @@
-enum DockerAPI {
-}
-
 enum DockerAPIError: Error {
     case apiError(status: UInt, error: DockerAPI.Error)
 }
