@@ -1,15 +1,18 @@
 import Foundation
 import AsyncHTTPClient
 import NIOHTTP1
+import Logging
 
 public class DockerClient {
 
     private let socket: String
-    internal let client: HTTPClient
+    private let client: HTTPClient
+    private let logger: Logger
 
     public init(socket: String = "/var/run/docker.sock") {
         self.socket = socket
         self.client = HTTPClient(eventLoopGroupProvider: .createNew)
+        self.logger = Logger(label: "DockerClient")
     }
 
     public func close() async throws {
@@ -40,6 +43,39 @@ public class DockerClient {
 
             throw DockerAPIError.apiError(status: response.status.code, error: parsedError)
         }
+    }
+
+    internal func stream<T: StreamingEndpoint>(_ endpoint: T) throws -> AsyncStream<T.StreamItem> {
+        return try self.stream(uri: endpoint.path, mapFn: endpoint.transformItem)
+    }
+
+    internal func stream<T: Decodable>(uri: String, mapFn: @escaping (String) throws -> T) throws -> AsyncStream<T> {
+        let socketPathBasedURL = URL(httpURLWithSocketPath: "/var/run/docker.sock", uri: uri)
+
+        let streamingDelegate = StringStreamingHTTPClientResponseDelegate()
+
+        let request = try HTTPClient.Request(url: socketPathBasedURL!, headers: HTTPHeaders([("Host", "")]))
+        let response = self.client.execute(request: request, delegate: streamingDelegate)
+
+        let stream = AsyncStream<T> { continuation in
+            streamingDelegate.onLineReceived = { line in
+                do {
+                    try continuation.yield(mapFn(line))
+                } catch {
+                    self.logger.warning("Failed transforming stream item: \(error). Item: \(line). URI: \(uri)")
+                }
+            }
+
+            streamingDelegate.onFinished = {
+                continuation.finish()
+            }
+
+            continuation.onTermination = { @Sendable _ in
+                response.cancel()
+            }
+        }
+
+        return stream
     }
 }
 
