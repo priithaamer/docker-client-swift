@@ -22,19 +22,4 @@ public struct Image: Decodable {
         case labels = "Labels"
         case containers = "Containers"
     }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(String.self, forKey: .id)
-        self.repoTags = try container.decodeIfPresent([String].self, forKey: .repoTags)
-        self.repoDigests = try container.decodeIfPresent([String].self, forKey: .repoDigests)
-        self.size = try container.decode(Int.self, forKey: .size)
-        self.virtualSize = try container.decodeIfPresent(Int.self, forKey: .virtualSize)
-        self.sharedSize = try container.decodeIfPresent(Int.self, forKey: .sharedSize)
-        self.labels = try container.decodeIfPresent([String: String].self, forKey: .labels)
-        self.containers = try container.decodeIfPresent(Int.self, forKey: .containers)
-
-        let timestamp = try container.decode(Int.self, forKey: .created)
-        self.created = Date(timeIntervalSince1970: TimeInterval(timestamp))
-    }
 }

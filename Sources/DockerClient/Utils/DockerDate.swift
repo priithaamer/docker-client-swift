@@ -34,21 +34,29 @@ extension JSONDecoder.DateDecodingStrategy {
     public static var dockerDate: JSONDecoder.DateDecodingStrategy {
         return .custom({ decoder -> Date in
             let container = try decoder.singleValueContainer()
-            let string = try container.decode(String.self)
 
-            if let date = DateFormatter.dockerDate.date(from: string) {
-                return date
+            if let string = try? container.decode(String.self) {
+                if let date = DateFormatter.dockerDate.date(from: string) {
+                    return date
+                }
+
+                if let date = DateFormatter.dockerDateShort.date(from: string) {
+                    return date
+                }
+
+                throw DockerDateError.invalidDateString(date: string)
             }
 
-            if let date = DateFormatter.dockerDateShort.date(from: string) {
-                return date
+            if let timestamp = try? container.decode(Int.self) {
+                return Date(timeIntervalSince1970: TimeInterval(timestamp))
             }
 
-            throw DockerDateError.invalidDateString(date: string)
+            throw DockerDateError.invalidDate
         })
     }
 }
 
 enum DockerDateError: Error {
+    case invalidDate
     case invalidDateString(date: String)
 }
