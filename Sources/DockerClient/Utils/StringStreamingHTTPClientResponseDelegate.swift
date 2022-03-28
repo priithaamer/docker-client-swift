@@ -8,7 +8,7 @@ class StringStreamingHTTPClientResponseDelegate: HTTPClientResponseDelegate {
     var onFinished: (() -> Void)?
 
     func didReceiveBodyPart(task: HTTPClient.Task<Bool>, _ buffer: ByteBuffer) -> EventLoopFuture<Void> {
-        let lines = String(buffer: buffer).split(separator: "\n")
+        let lines = String(buffer: buffer).split(whereSeparator: \.isNewline)
 
         for line in lines {
             if let onLineReceived = self.onLineReceived {
