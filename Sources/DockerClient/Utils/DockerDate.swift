@@ -20,6 +20,16 @@ extension DateFormatter {
     }
 }
 
+extension Date {
+    static func dateFromDockerDate(string: String) throws -> Date {
+        guard let date = DateFormatter.dockerDate.date(from: string) else {
+            throw DockerDateError.invalidDateString(date: string)
+        }
+
+        return date
+    }
+}
+
 extension JSONDecoder.DateDecodingStrategy {
     public static var dockerDate: JSONDecoder.DateDecodingStrategy {
         return .custom({ decoder -> Date in

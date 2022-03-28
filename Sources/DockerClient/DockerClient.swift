@@ -33,13 +33,15 @@ public class DockerClient {
         )
 
         let response = try await self.client.execute(request: request).get()
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .dockerDate
 
         guard let body = response.body else { throw DockerClientError.missingBody }
 
         if response.status == .ok {
-            return try JSONDecoder().decode(t, from: body)
+            return try decoder.decode(t, from: body)
         } else {
-            let parsedError = try JSONDecoder().decode(DockerAPI.Error.self, from: body)
+            let parsedError = try decoder.decode(DockerAPI.Error.self, from: body)
 
             throw DockerAPIError.apiError(status: response.status.code, error: parsedError)
         }

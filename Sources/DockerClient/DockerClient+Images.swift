@@ -10,5 +10,10 @@ extension DockerClient {
         public func list(all: Bool=false) async throws -> [Image] {
             return try await self.client.request(ListImagesEndpoint(all: all))
         }
+
+        public func inspect(name: String) async throws -> ImageDetails {
+            return try await self.client.request(InspectImageEndpoint(imageId: name))
+        }
+
     }
 }

@@ -22,7 +22,6 @@ struct ContainerStatsEndpoint: StreamingEndpoint {
     }
 
     func transformItem(item: String) throws -> ResourceUsage {
-        print(item)
         return try self.jsonDecoder.decode(ResourceUsage.self, from: item.data(using: .utf8)!)
     }
 }
