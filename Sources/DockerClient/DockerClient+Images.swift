@@ -26,5 +26,9 @@ extension DockerClient {
 
             return try await self.inspect(name: name)
         }
+
+        public func history(name: String) async throws -> [ImageLayer] {
+            return try await self.client.request(ImageHistoryEndpoint(name: name))
+        }
     }
 }
