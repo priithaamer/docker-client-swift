@@ -15,5 +15,16 @@ extension DockerClient {
             return try await self.client.request(InspectImageEndpoint(imageId: name))
         }
 
+        public func pull(name: String, tag: String = "latest", onProgress: (String, PullStatus.ProgressStatus, PullStatus.ProgressDetail) -> Void) async throws -> ImageDetails {
+            for await pullStatus in try self.client.stream(PullImageEndpoint(fromImage: name, tag: tag)) {
+                switch pullStatus {
+                case .progress(id: let id, status: let status, progressDetail: let progressDetail):
+                    onProgress(id, status, progressDetail)
+                default: break
+                }
+            }
+
+            return try await self.inspect(name: name)
+        }
     }
 }

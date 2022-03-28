@@ -48,15 +48,15 @@ public class DockerClient {
     }
 
     internal func stream<T: StreamingEndpoint>(_ endpoint: T) throws -> AsyncStream<T.StreamItem> {
-        return try self.stream(uri: endpoint.path, mapFn: endpoint.transformItem)
+        return try self.stream(uri: endpoint.path, method: endpoint.method, mapFn: endpoint.transformItem)
     }
 
-    internal func stream<T: Decodable>(uri: String, mapFn: @escaping (String) throws -> T) throws -> AsyncStream<T> {
+    internal func stream<T: Decodable>(uri: String, method: HTTPMethod, mapFn: @escaping (String) throws -> T) throws -> AsyncStream<T> {
         let socketPathBasedURL = URL(httpURLWithSocketPath: "/var/run/docker.sock", uri: uri)
 
         let streamingDelegate = StringStreamingHTTPClientResponseDelegate()
 
-        let request = try HTTPClient.Request(url: socketPathBasedURL!, headers: HTTPHeaders([("Host", "")]))
+        let request = try HTTPClient.Request(url: socketPathBasedURL!, method: method, headers: HTTPHeaders([("Host", "")]))
         let response = self.client.execute(request: request, delegate: streamingDelegate)
 
         let stream = AsyncStream<T> { continuation in

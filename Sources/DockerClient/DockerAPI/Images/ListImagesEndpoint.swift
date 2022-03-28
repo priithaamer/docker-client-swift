@@ -13,6 +13,7 @@ struct ListImagesEndpoint: Endpoint {
     var path: String {
         var url = URLComponents()
         url.path = "/images/json"
+        url.queryItems = []
         if self.all {
             url.queryItems?.append(URLQueryItem(name: "all", value: "true"))
         }
