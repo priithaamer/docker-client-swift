@@ -30,5 +30,9 @@ extension DockerClient {
         public func history(name: String) async throws -> [ImageLayer] {
             return try await self.client.request(ImageHistoryEndpoint(name: name))
         }
+
+        public func remove(name: String, force: Bool = false, noPrune: Bool = false) async throws -> [RemovedImageLayer] {
+            return try await self.client.request(RemoveImageEndpoint(name: name, force: force, noPrune: noPrune))
+        }
     }
 }

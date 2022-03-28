@@ -20,7 +20,7 @@ public class DockerClient {
     }
 
     internal func request<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
-        return try await self.request(T.Response.self, uri: endpoint.path)
+        return try await self.request(T.Response.self, uri: endpoint.path, method: endpoint.method)
     }
 
     internal func request<T: Decodable>(_ t: T.Type, uri: String, method: HTTPMethod = .GET) async throws -> T {

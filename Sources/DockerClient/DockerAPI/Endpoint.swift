@@ -5,6 +5,13 @@ protocol Endpoint {
     associatedtype Response: Decodable
 
     var path: String { get }
+    var method: HTTPMethod { get }
+}
+
+extension Endpoint {
+    public var method: HTTPMethod {
+        return .GET
+    }
 }
 
 protocol StreamingEndpoint {
