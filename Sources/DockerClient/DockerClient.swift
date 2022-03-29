@@ -20,28 +20,35 @@ public class DockerClient {
     }
 
     internal func request<T: Endpoint>(_ endpoint: T) async throws -> T.Response {
-        return try await self.request(T.Response.self, uri: endpoint.path, method: endpoint.method)
+        return try await self.request(T.Response.self, uri: endpoint.path, method: endpoint.method, requestBody: endpoint.body)
     }
 
-    internal func request<T: Decodable>(_ t: T.Type, uri: String, method: HTTPMethod = .GET) async throws -> T {
+    internal func request<T: Decodable, R: Encodable>(_ t: T.Type, uri: String, method: HTTPMethod = .GET, requestBody: R? = nil) async throws -> T {
         let socketPathBasedURL = URL(httpURLWithSocketPath: "/var/run/docker.sock", uri: uri)
 
         let request = try HTTPClient.Request(
             url: socketPathBasedURL!,
             method: method,
-            headers: HTTPHeaders([("Host", "")])
+            headers: HTTPHeaders([("Host", ""), ("Content-Type", "application/json")]),
+            body: requestBody.map { HTTPClient.Body.data(try! JSONEncoder().encode($0) ) }
         )
 
         let response = try await self.client.execute(request: request).get()
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .dockerDate
 
-        guard let body = response.body else { throw DockerClientError.missingBody }
+        if 200...399 ~= response.status.code {
+            if T.self == EmptyResponse.self {
+                return EmptyResponse() as! T
+            }
 
-        if response.status == .ok {
-            return try decoder.decode(t, from: body)
+            guard let responseBody = response.body else { throw DockerClientError.missingBody }
+
+            return try decoder.decode(t, from: responseBody)
         } else {
-            let parsedError = try decoder.decode(DockerAPI.Error.self, from: body)
+            guard let responseBody = response.body else { throw DockerClientError.missingBody }
+            
+            let parsedError = try decoder.decode(DockerAPI.Error.self, from: responseBody)
 
             throw DockerAPIError.apiError(status: response.status.code, error: parsedError)
         }
