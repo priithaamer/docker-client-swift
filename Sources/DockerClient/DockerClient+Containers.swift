@@ -18,6 +18,10 @@ extension DockerClient {
             return try await client.request(CreateContainerEndpoint(image: image, cmd: cmd))
         }
 
+        public func inspect(id: String, size: Bool = false) async throws -> ContainerDetails {
+            return try await client.request(InspectContainerEndpoint(id: id, size: size))
+        }
+
         public func logs(container: Container, follow: Bool = true, timestamps: Bool = false, tail: Int? = nil) throws -> AsyncStream<String> {
             return try self.logs(containerId: container.id, follow: follow, timestamps: timestamps, tail: tail)
         }
