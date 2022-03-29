@@ -14,14 +14,16 @@ extension DockerClient {
             return try await client.request(ListContainersEndpoint(all: all))
         }
 
-        public func logs(container: Container,
-                         follow: Bool=true,
-                         timestamps: Bool=false,
-                         tail: Int?=nil) throws -> AsyncStream<String> {
-            return try self.client.stream(ContainerLogsEndpoint(containerId: container.id,
-                                                                    follow: follow,
-                                                                    timestamps: timestamps,
-                                                                    tail: tail))
+        public func logs(container: Container, follow: Bool = true, timestamps: Bool = false, tail: Int? = nil) throws -> AsyncStream<String> {
+            return try self.logs(containerId: container.id, follow: follow, timestamps: timestamps, tail: tail)
+        }
+
+        public func logs(container: ContainerDetails, follow: Bool = true, timestamps: Bool = true, tail: Int? = nil) throws -> AsyncStream<String> {
+            return try self.logs(containerId: container.id, follow: follow, timestamps: timestamps, tail: tail)
+        }
+
+        public func logs(containerId: String, follow: Bool = true, timestamps: Bool = true, tail: Int? = nil) throws -> AsyncStream<String> {
+            return try self.client.stream(ContainerLogsEndpoint(containerId: containerId, follow: follow, timestamps: timestamps, tail: tail))
         }
 
         public func stats(container: Container, stream: Bool=true) throws -> AsyncStream<ResourceUsage> {
