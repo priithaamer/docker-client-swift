@@ -27,7 +27,15 @@ extension DockerClient {
         }
 
         public func stats(container: Container, stream: Bool=true) throws -> AsyncStream<ResourceUsage> {
-            return try self.client.stream(ContainerStatsEndpoint(containerId: container.id, stream: stream))
+            return try self.stats(containerId: container.id, stream: stream)
+        }
+
+        public func stats(container: ContainerDetails, stream: Bool = true) throws -> AsyncStream<ResourceUsage> {
+            return try self.stats(containerId: container.id, stream: stream)
+        }
+
+        public func stats(containerId: String, stream: Bool = true) throws -> AsyncStream<ResourceUsage> {
+            return try self.client.stream(ContainerStatsEndpoint(containerId: containerId, stream: stream))
         }
     }
 }
