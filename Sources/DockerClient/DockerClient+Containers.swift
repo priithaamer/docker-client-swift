@@ -34,6 +34,10 @@ extension DockerClient {
             _ = try await client.request(KillContainerEndpoint(id: id, signal: signal))
         }
 
+        public func remove(id: String, removeVolumes: Bool = false, force: Bool = false, link: Bool = false) async throws -> Void {
+            _ = try await client.request(RemoveContainerEndpoint(id: id, removeVolumes: removeVolumes, force: force, link: link))
+        }
+
         public func inspect(id: String, size: Bool = false) async throws -> ContainerDetails {
             return try await client.request(InspectContainerEndpoint(id: id, size: size))
         }
