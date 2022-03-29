@@ -26,6 +26,10 @@ extension DockerClient {
             _ = try await client.request(StopContainerEndpoint(id: id))
         }
 
+        public func restart(id: String, wait: Int? = nil) async throws -> Void {
+            _ = try await client.request(RestartContainerEndpoint(id: id, wait: wait))
+        }
+
         public func inspect(id: String, size: Bool = false) async throws -> ContainerDetails {
             return try await client.request(InspectContainerEndpoint(id: id, size: size))
         }
